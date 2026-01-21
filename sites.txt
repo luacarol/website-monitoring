@@ -1,3 +1,13 @@
+# Website Monitoring List
+# Add one URL per line
+# Lines starting with # are ignored
+
+https://www.google.com
+https://www.github.com
+https://httpbin.org/status/200
+https://httpbin.org/status/404
+https://www.stackoverflow.com
+https://www.golang.org
 https://www.alura.com.br/
 https://httpbin.org/status/404
 https://www.caelum.com.br/
