@@ -1,0 +1,12 @@
+20/01/2026 23:04:40 - https://www.alura.com.br/ - online: true
+20/01/2026 23:04:41 - https://httpbin.org/status/404 - online: false
+20/01/2026 23:04:41 - https://www.caelum.com.br/ - online: true
+20/01/2026 23:04:42 - https://httpbin.org/status/500 - online: false
+20/01/2026 23:04:47 - https://www.alura.com.br/ - online: true
+20/01/2026 23:04:47 - https://httpbin.org/status/404 - online: false
+20/01/2026 23:04:47 - https://www.caelum.com.br/ - online: true
+20/01/2026 23:04:48 - https://httpbin.org/status/500 - online: false
+20/01/2026 23:04:53 - https://www.alura.com.br/ - online: true
+20/01/2026 23:04:53 - https://httpbin.org/status/404 - online: false
+20/01/2026 23:04:53 - https://www.caelum.com.br/ - online: true
+20/01/2026 23:04:53 - https://httpbin.org/status/500 - online: false
