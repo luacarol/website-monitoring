@@ -40,3 +40,7 @@ log.txt
 # Build artifacts
 build/
 dist/
+*.db
+monitor.db
+*.log
+log.txt
