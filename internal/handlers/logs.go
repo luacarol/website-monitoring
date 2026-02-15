@@ -18,7 +18,7 @@ func GetLogs(c *gin.Context) {
 		return
 	}
 
-	// Valores padrão
+	// Default values
 	if query.Page <= 0 {
 		query.Page = 1
 	}
@@ -31,10 +31,10 @@ func GetLogs(c *gin.Context) {
 
 	db := database.GetDB()
 
-	// Construir query
+	// Build query
 	dbQuery := db.Model(&models.MonitorLog{}).Preload("Site")
 
-	// Filtros
+	// Filters
 	if query.SiteID != 0 {
 		dbQuery = dbQuery.Where("site_id = ?", query.SiteID)
 	}
@@ -59,16 +59,16 @@ func GetLogs(c *gin.Context) {
 		dbQuery = dbQuery.Where("is_online = ?", false)
 	}
 
-	// Contar total
+	// Count total
 	var total int64
 	dbQuery.Count(&total)
 
-	// Buscar com paginação
+	// Fetch with pagination
 	var logs []models.MonitorLog
 	offset := (query.Page - 1) * query.Limit
 
 	if err := dbQuery.Order("checked_at desc").Limit(query.Limit).Offset(offset).Find(&logs).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao buscar logs"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching logs"})
 		return
 	}
 
@@ -87,16 +87,16 @@ func GetStats(c *gin.Context) {
 
 	var stats models.StatsResponse
 
-	// Total de sites ativos
+	// Total active sites
 	var totalSites int64
 	db.Model(&models.Site{}).Where("active = ?", true).Count(&totalSites)
 	stats.TotalSites = int(totalSites)
 
-	// Buscar todos os sites ativos
+	// Fetch all active sites
 	var activeSites []models.Site
 	db.Where("active = ?", true).Find(&activeSites)
 
-	// Contar sites online/offline baseado no último check de cada site
+	// Count online/offline sites based on last check of each site
 	onlineCount := 0
 	offlineCount := 0
 
@@ -107,20 +107,20 @@ func GetStats(c *gin.Context) {
 			First(&lastLog).Error
 
 		if err == nil {
-			// Site tem logs
+			// Site has logs
 			if lastLog.IsOnline {
 				onlineCount++
 			} else {
 				offlineCount++
 			}
 		}
-		// Se não tem logs ainda, não conta em nenhum dos dois
+		// If no logs yet, don't count in either
 	}
 
 	stats.OnlineSites = onlineCount
 	stats.OfflineSites = offlineCount
 
-	// Uptime geral (últimas 24h)
+	// Overall uptime (last 24h)
 	since := time.Now().Add(-24 * time.Hour)
 	var totalChecks int64
 	var onlineChecks int64

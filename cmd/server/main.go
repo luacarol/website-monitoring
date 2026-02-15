@@ -22,27 +22,27 @@ var (
 	monitorService *services.MonitorService
 	upgrader       = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
-			return true // Permitir todas as origens em desenvolvimento
+			return true // Allow all origins in development
 		},
 	}
 )
 
 func main() {
-	// Inicializar banco de dados
+	// Initialize database
 	database.InitDatabase()
 
-	// Inicializar serviço de monitoramento
+	// Initialize monitoring service
 	monitorService = services.NewMonitorService()
 	monitorService.Start()
 
-	// Configurar Gin
+	// Configure Gin
 	if os.Getenv("GIN_MODE") == "" {
 		gin.SetMode(gin.DebugMode)
 	}
 
 	router := gin.Default()
 
-	// Configurar CORS
+	// Configure CORS
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"}, // React dev server
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -52,7 +52,7 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Routes da API
+	// API Routes
 	api := router.Group("/api")
 	{
 		// Sites
@@ -72,65 +72,65 @@ func main() {
 		api.GET("/monitor/status", getMonitorStatus)
 	}
 
-	// WebSocket para updates em tempo real
+	// WebSocket for real-time updates
 	router.GET("/ws", handleWebSocket)
 
-	// Servir arquivos estáticos do React (quando buildado)
+	// Serve React static files (when built)
 	router.Static("/static", "./web/build/static")
 	router.StaticFile("/", "./web/build/index.html")
 	router.StaticFile("/favicon.ico", "./web/build/favicon.ico")
 
-	// Capturar sinais do sistema para graceful shutdown
+	// Capture system signals for graceful shutdown
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		log.Println("\n🛑 Recebido sinal de parada...")
+		log.Println("\n🛑 Received stop signal...")
 		monitorService.Stop()
 		os.Exit(0)
 	}()
 
-	// Iniciar servidor
+	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	log.Printf("🚀 Servidor iniciado na porta %s", port)
+	log.Printf("🚀 Server started on port %s", port)
 	log.Printf("📊 Dashboard: http://localhost:%s", port)
 	log.Printf("🔗 API: http://localhost:%s/api", port)
 
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
-// Handler para verificar site imediatamente
+// Handler to check site immediately
 func checkSiteNow(c *gin.Context) {
 	siteID := c.Param("id")
 	if siteID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID do site é obrigatório"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Site ID is required"})
 		return
 	}
 
-	// Converter string para uint
+	// Convert string to uint
 	var id uint
 	if _, err := fmt.Sscanf(siteID, "%d", &id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID inválido"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	result := monitorService.CheckSiteNow(id)
 	if result == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Site não encontrado"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Verificação realizada",
+		"message": "Check performed",
 		"result":  result,
 	})
 }
 
-// Handler para status do monitor
+// Handler for monitor status
 func getMonitorStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"running":   monitorService.IsRunning(),
@@ -138,35 +138,35 @@ func getMonitorStatus(c *gin.Context) {
 	})
 }
 
-// WebSocket para updates em tempo real
+// WebSocket for real-time updates
 func handleWebSocket(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.Printf("❌ Erro ao fazer upgrade WebSocket: %v", err)
+		log.Printf("❌ Error upgrading WebSocket: %v", err)
 		return
 	}
 	defer conn.Close()
 
-	log.Println("🔗 Nova conexão WebSocket estabelecida")
+	log.Println("🔗 New WebSocket connection established")
 
-	// Loop para manter conexão ativa e enviar updates
+	// Loop to keep connection alive and send updates
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		// Enviar stats atualizadas
+		// Send updated stats
 		stats := getStatsData()
 		if err := conn.WriteJSON(stats); err != nil {
-			log.Printf("❌ Erro ao enviar dados WebSocket: %v", err)
+			log.Printf("❌ Error sending WebSocket data: %v", err)
 			return
 		}
 	}
 }
 
-// Helper para obter dados de stats
+// Helper to get stats data
 func getStatsData() map[string]interface{} {
-	// Implementar lógica similar ao handlers.GetStats
-	// Por simplicidade, retornando dados mock aqui
+	// Implement logic similar to handlers.GetStats
+	// For simplicity, returning mock data here
 	return map[string]interface{}{
 		"type":      "stats_update",
 		"timestamp": time.Now(),

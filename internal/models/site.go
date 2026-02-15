@@ -15,10 +15,10 @@ type Site struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 
-	// Relacionamento com logs
+	// Relationship with logs
 	Logs []MonitorLog `json:"logs,omitempty" gorm:"foreignKey:SiteID"`
 
-	// Campos computados (não salvos no banco)
+	// Computed fields (not saved in database)
 	LastStatus *int       `json:"last_status,omitempty" gorm:"-"`
 	LastCheck  *time.Time `json:"last_check,omitempty" gorm:"-"`
 	Uptime     *float64   `json:"uptime,omitempty" gorm:"-"`

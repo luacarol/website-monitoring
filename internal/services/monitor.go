@@ -21,17 +21,17 @@ func NewMonitorService() *MonitorService {
 	}
 }
 
-// Iniciar monitoramento contínuo
+// Start continuous monitoring
 func (m *MonitorService) Start() {
 	if m.isRunning {
-		log.Println("⚠️ Monitoramento já está rodando")
+		log.Println("⚠️ Monitoring is already running")
 		return
 	}
 
 	m.isRunning = true
-	log.Println("🚀 Iniciando serviço de monitoramento...")
+	log.Println("🚀 Starting monitoring service...")
 
-	// Goroutine para monitoramento contínuo
+	// Goroutine for continuous monitoring
 	go func() {
 		ticker := time.NewTicker(30 * time.Second) // Check a cada 30 segundos
 		defer ticker.Stop()
@@ -41,7 +41,7 @@ func (m *MonitorService) Start() {
 			case <-ticker.C:
 				m.checkAllSites()
 			case <-m.stopChan:
-				log.Println("⏹️ Parando serviço de monitoramento...")
+				log.Println("⏹️ Stopping monitoring service...")
 				m.isRunning = false
 				return
 			}
@@ -56,38 +56,38 @@ func (m *MonitorService) Stop() {
 	}
 }
 
-// Verificar todos os sites ativos
+// Check all active sites
 func (m *MonitorService) checkAllSites() {
 	db := database.GetDB()
 
 	var sites []models.Site
 	if err := db.Where("active = ?", true).Find(&sites).Error; err != nil {
-		log.Printf("❌ Erro ao buscar sites: %v", err)
+		log.Printf("❌ Error fetching sites: %v", err)
 		return
 	}
 
 	log.Printf("🔍 Verificando %d sites...", len(sites))
 
 	for _, site := range sites {
-		go m.checkSite(site) // Verificação paralela
+		go m.checkSite(site) // Parallel checking
 	}
 }
 
-// Verificar um site específico
+// Check a specific site
 func (m *MonitorService) checkSite(site models.Site) {
 	startTime := time.Now()
 
-	// Fazer requisição HTTP
+	// Make HTTP request
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
 
 	response, err := client.Get(site.URL)
 
-	// Calcular tempo de resposta
+	// Calculate response time
 	responseTime := time.Since(startTime).Milliseconds()
 
-	// Criar log entry
+	// Create log entry
 	monitorLog := models.MonitorLog{
 		SiteID:       site.ID,
 		ResponseTime: responseTime,
@@ -95,7 +95,7 @@ func (m *MonitorService) checkSite(site models.Site) {
 	}
 
 	if err != nil {
-		// Erro na requisição
+		// Request error
 		monitorLog.IsOnline = false
 		monitorLog.StatusCode = 0
 		monitorLog.ErrorMessage = err.Error()
@@ -115,26 +115,26 @@ func (m *MonitorService) checkSite(site models.Site) {
 		}
 	}
 
-	// Salvar no banco
+	// Save to database
 	db := database.GetDB()
 	if err := db.Create(&monitorLog).Error; err != nil {
-		log.Printf("❌ Erro ao salvar log para %s: %v", site.Name, err)
+		log.Printf("❌ Error saving log for %s: %v", site.Name, err)
 	}
 }
 
-// Verificar site individual (para API)
+// Check individual site (for API)
 func (m *MonitorService) CheckSiteNow(siteID uint) *models.MonitorLog {
 	db := database.GetDB()
 
 	var site models.Site
 	if err := db.First(&site, siteID).Error; err != nil {
-		log.Printf("❌ Site não encontrado: %d", siteID)
+		log.Printf("❌ Site not found: %d", siteID)
 		return nil
 	}
 
 	m.checkSite(site)
 
-	// Retornar último log
+	// Return last log
 	var lastLog models.MonitorLog
 	db.Where("site_id = ?", siteID).Order("checked_at desc").First(&lastLog)
 

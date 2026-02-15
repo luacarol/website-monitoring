@@ -28,7 +28,7 @@ func main() {
 		// } else if command == 0 {
 		// 	fmt.Println("Saindo do Programa...")
 		// } else {
-		// 	fmt.Println("Não conheço este comando")
+		// 	fmt.Println("I don't know this command")
 		// }
 
 		switch command {
@@ -40,7 +40,7 @@ func main() {
 			fmt.Println("Saindo do Programa...")
 			os.Exit(0)
 		default:
-			fmt.Println("Não conheço este comando")
+			fmt.Println("I don't know this command")
 			os.Exit(-1)
 		}
 	}
@@ -51,18 +51,18 @@ func showIntroduction() {
 	var version float32 = 1.25
 
 	// println("Hello, World!") // This also works
-	// fmt.Println("Hello, World com Go!")
-	fmt.Println("Olá, sra.", name)
-	fmt.Println("Este programa está na versão", version)
+	// fmt.Println("Hello, World with Go!")
+	fmt.Println("Hello, Mrs.", name)
+	fmt.Println("This program is at version", version)
 
 	// Import "reflect"
-	// fmt.Println("O tipo da variável name é:", reflect.TypeOf(name))
+	// fmt.Println("The type of the variable name is:", reflect.TypeOf(name))
 }
 
 func showMenu() {
-	fmt.Println("1- Iniciar Monitoramento")
-	fmt.Println("2- Exibir Logs")
-	fmt.Println("0- Sair do Programa")
+	fmt.Println("1- Start Monitoring")
+	fmt.Println("2- Display Logs")
+	fmt.Println("0- Exit Program")
 }
 
 func readCommand() int {
@@ -70,15 +70,15 @@ func readCommand() int {
 	// fmt.Scanf("%d", &command)
 	fmt.Scan(&command)
 
-	// fmt.Println("O endereço da minha variável é", &command)
-	fmt.Println("O comando escolhido foi:", command)
+	// fmt.Println("The address of my variable is", &command)
+	fmt.Println("The chosen command was:", command)
 	fmt.Println("")
 
 	return command
 }
 
 func initMonitoring() {
-	fmt.Println("Monitorando...")
+	fmt.Println("Monitoring...")
 	// site := "https://www.alura.com.br/"
 	// site := "https://httpbin.org/status/404" // 200
 
@@ -91,12 +91,12 @@ func initMonitoring() {
 	sites := readSitesFromFile()
 
 	// for i, site := range sites {
-	// 	fmt.Println("Estou passando na posição ", i, "do meu slice e essa posição tem o site:", site)
+	// 	fmt.Println("I'm at position", i, "of my slice and this position has the site:", site)
 	// }
 
 	for i := 0; i < monitorings; i++ {
 		for i, site := range sites {
-			fmt.Println("Testando o site", i, ":", site)
+			fmt.Println("Testing site", i, ":", site)
 			verifySite(site)
 		}
 
@@ -110,7 +110,7 @@ func initMonitoring() {
 func verifySite(site string) {
 	response, err := http.Get(site)
 	if err != nil {
-		fmt.Println("Erro ao acessar o site:", err)
+		fmt.Println("Error accessing the site:", err)
 		return
 	}
 	defer response.Body.Close()
@@ -118,10 +118,10 @@ func verifySite(site string) {
 	// fmt.Println("Response:", response)
 
 	if response.StatusCode == 200 {
-		fmt.Println("Site:", site, "foi carregado com sucesso!")
+		fmt.Println("Site:", site, "successfully loaded!")
 		registerLog(site, true)
 	} else {
-		fmt.Println("Site:", site, "está com problemas. Status Code:", response.StatusCode)
+		fmt.Println("Site:", site, "has problems. Status Code:", response.StatusCode)
 		registerLog(site, false)
 	}
 }
@@ -134,7 +134,7 @@ func readSitesFromFile() []string {
 	// fmt.Println(string(file))
 
 	if err != nil {
-		fmt.Println("Ocorreu um erro ao abrir o arquivo:", err)
+		fmt.Println("An error occurred while opening the file:", err)
 	}
 
 	reader := bufio.NewReader(file)
@@ -158,7 +158,7 @@ func registerLog(site string, status bool) {
 	file, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
 	if err != nil {
-		fmt.Println("Ocorreu um erro ao abrir o arquivo de log:", err)
+		fmt.Println("An error occurred while opening the log file:", err)
 	}
 
 	file.WriteString(time.Now().Format("02/01/2006 15:04:05") + " - " + site + " - online: " + strconv.FormatBool(status) + "\n")
@@ -168,12 +168,12 @@ func registerLog(site string, status bool) {
 }
 
 func printLogs() {
-	fmt.Println("Exibindo Logs...")
+	fmt.Println("Displaying Logs...")
 
 	file, err := os.ReadFile("log.txt")
 
 	if err != nil {
-		fmt.Println("Ocorreu um erro ao ler o arquivo de log:", err)
+		fmt.Println("An error occurred while reading the log file:", err)
 	}
 
 	fmt.Println(string(file))
