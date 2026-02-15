@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#grad1)"/>
+  
+  <!-- Monitor/Screen -->
+  <rect x="25" y="30" width="50" height="35" rx="3" fill="white" opacity="0.95"/>
+  
+  <!-- Activity line (heartbeat style) -->
+  <polyline points="30,47 38,47 42,42 46,52 50,47 54,47" 
+            stroke="#3b82f6" stroke-width="2.5" fill="none" 
+            stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Check mark -->
+  <circle cx="65" cy="40" r="10" fill="#10b981"/>
+  <polyline points="60,40 63,43 70,36" 
+            stroke="white" stroke-width="2.5" fill="none" 
+            stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Monitor stand -->
+  <rect x="45" y="65" width="10" height="5" fill="white" opacity="0.9"/>
+  <rect x="35" y="70" width="30" height="3" rx="1.5" fill="white" opacity="0.9"/>
+</svg>
