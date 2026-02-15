@@ -92,31 +92,33 @@ func GetStats(c *gin.Context) {
 	db.Model(&models.Site{}).Where("active = ?", true).Count(&totalSites)
 	stats.TotalSites = int(totalSites)
 
-	// Sites online/offline (baseado no último check)
-	// Query mais complexa para obter último status de cada site
-	var onlineCount int64
-	var offlineCount int64
+	// Buscar todos os sites ativos
+	var activeSites []models.Site
+	db.Where("active = ?", true).Find(&activeSites)
 
-	// Subquery para pegar o último log de cada site
-	subQuery := db.Table("monitor_logs").
-		Select("site_id, MAX(checked_at) as last_check").
-		Group("site_id")
+	// Contar sites online/offline baseado no último check de cada site
+	onlineCount := 0
+	offlineCount := 0
 
-	// Join para pegar o status do último check
-	db.Table("monitor_logs ml1").
-		Joins("JOIN (?) ml2 ON ml1.site_id = ml2.site_id AND ml1.checked_at = ml2.last_check", subQuery).
-		Joins("JOIN sites s ON ml1.site_id = s.id").
-		Where("s.active = ? AND ml1.is_online = ?", true, true).
-		Count(&onlineCount)
+	for _, site := range activeSites {
+		var lastLog models.MonitorLog
+		err := db.Where("site_id = ?", site.ID).
+			Order("checked_at DESC").
+			First(&lastLog).Error
 
-	db.Table("monitor_logs ml1").
-		Joins("JOIN (?) ml2 ON ml1.site_id = ml2.site_id AND ml1.checked_at = ml2.last_check", subQuery).
-		Joins("JOIN sites s ON ml1.site_id = s.id").
-		Where("s.active = ? AND ml1.is_online = ?", true, false).
-		Count(&offlineCount)
+		if err == nil {
+			// Site tem logs
+			if lastLog.IsOnline {
+				onlineCount++
+			} else {
+				offlineCount++
+			}
+		}
+		// Se não tem logs ainda, não conta em nenhum dos dois
+	}
 
-	stats.OnlineSites = int(onlineCount)
-	stats.OfflineSites = int(offlineCount)
+	stats.OnlineSites = onlineCount
+	stats.OfflineSites = offlineCount
 
 	// Uptime geral (últimas 24h)
 	since := time.Now().Add(-24 * time.Hour)
